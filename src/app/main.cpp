@@ -1,7 +1,6 @@
 #include "assets/ResourcePaths.h"
 #include "audio/AudioService.h"
 #include "core/Game.h"
-#include "core/constants.h"
 #include "input/InputController.h"
 #include "rendering/RaylibRenderer.h"
 #include "rendering/RenderingConstants.h"
@@ -34,10 +33,10 @@ namespace
             case GameAction::MoveRight:
                 game.moveBlockRight();
                 break;
-            case GameAction::MoveDown:
+            case GameAction::SoftDrop:
             {
-                const auto result = game.moveBlockDown(true);
-                if (result.rowsCleared > 0)
+                const auto result = game.softDrop();
+                if (result.linesCleared > 0)
                 {
                     audio.playClear();
                 }
@@ -48,6 +47,23 @@ namespace
                 {
                     audio.playRotate();
                 }
+                break;
+            case GameAction::HardDrop:
+                if (game.isGameOver())
+                {
+                    game.reset();
+                }
+                else
+                {
+                    const auto result = game.hardDrop();
+                    if (result.linesCleared > 0)
+                    {
+                        audio.playClear();
+                    }
+                }
+                break;
+            case GameAction::TogglePause:
+                game.togglePause();
                 break;
             case GameAction::Restart:
                 if (game.isGameOver())
@@ -82,10 +98,10 @@ int main(int argc, char **argv)
                 applyAction(*action, game, audio);
             }
 
-            if (eventTriggered(kGameSpeedSeconds))
+            if (eventTriggered(game.dropIntervalSeconds()))
             {
-                const auto result = game.moveBlockDown();
-                if (result.rowsCleared > 0)
+                const auto result = game.tickDown();
+                if (result.linesCleared > 0)
                 {
                     audio.playClear();
                 }

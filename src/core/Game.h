@@ -2,17 +2,17 @@
 #define TETRIS_CORE_GAME_H
 
 #include "Block.h"
+#include "GameStatus.h"
 #include "Grid.h"
-
-#include <random>
-#include <vector>
+#include "RandomBag.h"
 
 namespace tetris
 {
-    struct MoveDownResult
+    struct DropResult
     {
         bool blockLocked = false;
-        int rowsCleared = 0;
+        int rowsDropped = 0;
+        int linesCleared = 0;
         bool gameOver = false;
     };
 
@@ -25,15 +25,33 @@ namespace tetris
 
         bool moveBlockRight();
 
-        MoveDownResult moveBlockDown(bool awardSoftDropPoint = false);
+        DropResult softDrop();
+
+        DropResult tickDown();
+
+        DropResult hardDrop();
 
         bool rotateBlock();
 
+        void togglePause();
+
         void reset();
+
+        GameStatus status() const;
+
+        bool isRunning() const;
+
+        bool isPaused() const;
 
         bool isGameOver() const;
 
         int score() const;
+
+        int level() const;
+
+        int totalLinesCleared() const;
+
+        double dropIntervalSeconds() const;
 
         const Grid &grid() const;
 
@@ -46,21 +64,23 @@ namespace tetris
 
         bool blockFits() const;
 
+        DropResult moveBlockDown(bool awardSoftDropPoint);
+
         int lockBlock();
 
-        void updateScore(int linesCleared, int moveDownPoints);
+        void applyLineClearScore(int linesCleared);
 
-        Block getRandomBlock();
+        void addDropScore(int score);
 
-        std::vector<Block> getAllBlocks();
+        Block nextRandomBlock();
 
         Grid grid_;
-        std::vector<Block> blocks_;
+        RandomBag randomBag_;
         Block currentBlock_;
         Block nextBlock_;
-        std::mt19937 randomEngine_;
-        bool gameOver_;
+        GameStatus status_;
         int gameScore_;
+        int totalLinesCleared_;
     };
 }
 

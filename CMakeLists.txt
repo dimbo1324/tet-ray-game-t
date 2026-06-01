@@ -28,6 +28,8 @@ target_sources(tet_ray_game_core
         src/core/Game.cpp
         src/core/Grid.cpp
         src/core/Position.cpp
+        src/core/RandomBag.cpp
+        src/core/ScoreSystem.cpp
 )
 
 target_compile_features(tet_ray_game_core PUBLIC cxx_std_23)

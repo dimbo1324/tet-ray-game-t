@@ -9,8 +9,10 @@ namespace tetris
     {
         MoveLeft,
         MoveRight,
-        MoveDown,
+        SoftDrop,
         Rotate,
+        HardDrop,
+        TogglePause,
         Restart
     };
 

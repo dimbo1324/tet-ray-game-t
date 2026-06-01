@@ -1,16 +1,13 @@
-#ifndef POSITION_H
-#define POSITION_H
+#ifndef TETRIS_CORE_POSITION_H
+#define TETRIS_CORE_POSITION_H
 
 namespace tetris
+{
+    struct Position
     {
-        class Position
-            {
-            public:
-                Position(int row, int col);
+        int row{};
+        int col{};
+    };
+}
 
-                int row;
-                int col;
-            };
-    } // namespace tetris
-
-#endif // POSITION_H
+#endif

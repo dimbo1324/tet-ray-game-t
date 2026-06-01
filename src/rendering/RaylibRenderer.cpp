@@ -56,6 +56,15 @@ namespace tetris
                        {static_cast<float>(kXUiTextPosition - 25), static_cast<float>(kYUiTextPosition + 435)},
                        kFontSizeUiText - 2, 0, WHITE);
         }
+        else if (game.isPaused())
+        {
+            DrawTextEx(font_, "PAUSED",
+                       {static_cast<float>(kXUiTextPosition - 5), static_cast<float>(kYUiTextPosition + 425)},
+                       kFontSizeUiText, 0, WHITE);
+            DrawTextEx(font_, "P TO RESUME",
+                       {static_cast<float>(kXUiTextPosition - 35), static_cast<float>(kYUiTextPosition + 455)},
+                       kFontSizeUiText - 8, 0, WHITE);
+        }
 
         DrawRectangleRounded({320, 55, 170, 60}, 0.3f, 6, kLightBlue);
 
@@ -63,6 +72,14 @@ namespace tetris
         std::snprintf(scoreText, sizeof(scoreText), "%d", game.score());
         Vector2 scoreTextSize = MeasureTextEx(font_, scoreText, 38, 2);
         DrawTextEx(font_, scoreText, {kXUiTextPosition + (140 - scoreTextSize.x) / 2, 70}, kFontSizeUiText, 0, WHITE);
+
+        char levelText[24];
+        std::snprintf(levelText, sizeof(levelText), "Level %d", game.level());
+        DrawTextEx(font_, levelText, {330, 130}, kFontSizeUiText - 6, 0, WHITE);
+
+        char linesText[24];
+        std::snprintf(linesText, sizeof(linesText), "Lines %d", game.totalLinesCleared());
+        DrawTextEx(font_, linesText, {330, 165}, kFontSizeUiText - 6, 0, WHITE);
 
         DrawRectangleRounded({320, 215, 170, 180}, 0.3f, 6, kLightBlue);
 
@@ -75,39 +92,37 @@ namespace tetris
 
     void RaylibRenderer::drawGrid(const Grid &grid) const
     {
-        const auto colors = GetCellColors();
         for (int row = 0; row < grid.rowCount(); ++row)
         {
             for (int col = 0; col < grid.colCount(); ++col)
             {
-                int cellValue = grid.cell(row, col);
                 DrawRectangle(col * kCellSize + kExtraPixels, row * kCellSize + kExtraPixels, kCellSize - 1,
-                              kCellSize - 1, colors[cellValue]);
+                              kCellSize - 1, colorFor(grid.cell(row, col)));
             }
         }
     }
 
     void RaylibRenderer::drawBlock(const Block &block, int offsetX, int offsetY) const
     {
-        const auto colors = GetCellColors();
-        const auto tiles = block.getCellsPositions();
+        const auto tiles = block.cellPositions();
         for (const auto &pos : tiles)
         {
             DrawRectangle(pos.col * kCellSize + offsetX, pos.row * kCellSize + offsetY, kCellSize - 1, kCellSize - 1,
-                          colors.at(block.id));
+                          colorFor(block.type()));
         }
     }
 
     void RaylibRenderer::drawNextBlock(const Block &block) const
     {
-        switch (block.id)
+        switch (block.type())
         {
-            case 3:
+            case TetrominoType::I:
                 drawBlock(block, 255, 290);
                 break;
-            case 4:
+            case TetrominoType::O:
                 drawBlock(block, 255, 280);
                 break;
+            case TetrominoType::Empty:
             default:
                 drawBlock(block, 270, 270);
                 break;

@@ -4,7 +4,7 @@ Modern C++23 Tetris game built with Raylib and portable CMake.
 
 ## Project Description
 
-Tet-Ray-Game is a classic Tetris-style game implemented in C++. The gameplay model now lives in a Raylib-free core layer, while rendering, audio, input, assets, and the application shell are kept as adapter layers around it.
+Tet-Ray-Game is a classic Tetris-style game implemented in C++. The gameplay model lives in a Raylib-free core layer, while rendering, audio, input, assets, and the application shell are adapter layers around it.
 
 ## Current Status
 
@@ -19,15 +19,21 @@ Implemented:
 - C++23 baseline.
 - Portable `assets/` runtime layout.
 - Core/gameplay split from Raylib-specific code.
+- Domain model cleanup with safer tetromino identity.
+- 7-bag tetromino generation.
+- Pause/resume.
+- Hard drop.
+- Soft and hard drop scoring.
+- Level and speed progression.
 
 Planned:
 
-- Domain cleanup.
-- Gameplay MVP polish.
 - Unit tests.
 - CI.
 - Docker build.
 - Release packaging.
+- UI visual polish.
+- Static analysis.
 
 ## Requirements
 
@@ -87,14 +93,37 @@ cd build/debug
 ./tet_ray_game_app.exe
 ```
 
+## Controls
+
+- Left arrow: move left.
+- Right arrow: move right.
+- Down arrow: soft drop.
+- Up arrow: rotate.
+- Space: hard drop while running.
+- P or Escape: pause/resume.
+- Enter: restart after game over.
+- Space: restart after game over.
+
 ## Architecture
 
 - `src/core` contains gameplay state and rules. It does not include Raylib and is intended to be testable without opening a window.
-- `src/rendering` contains Raylib drawing code, colors, UI panels, grid/block drawing, and text rendering.
+- `src/core` owns `TetrominoType`, `GameStatus`, `RandomBag`, and `ScoreSystem`.
+- `src/rendering` contains Raylib drawing code, colors, UI panels, grid/block drawing, pause/game-over overlays, and text rendering.
 - `src/audio` owns Raylib music and sound resources.
 - `src/input` maps Raylib keyboard input to game actions.
 - `src/assets` resolves runtime asset paths.
 - `src/app` wires the core and adapters into the game loop.
+
+## Gameplay Rules
+
+- Pieces use a 7-bag: every bag contains one each of I, J, L, O, S, T, and Z before reshuffling.
+- `GameStatus` tracks Running, Paused, and GameOver.
+- While paused, movement, rotation, soft drop, hard drop, and automatic falling are ignored. Music currently continues.
+- Line clear scoring is `100/300/500/800 * level` for 1/2/3/4 lines.
+- Soft drop gives `+1` per manually dropped cell.
+- Hard drop gives `+2` per dropped cell and locks immediately.
+- Level is `(total lines cleared / 10) + 1`.
+- Drop interval starts at `0.5s`, decreases by `0.04s` per level, and is clamped to `0.08s`.
 
 ## Assets
 
@@ -143,9 +172,9 @@ Missing assets are reported to `std::cerr` before Raylib attempts to load them.
 
 ## Roadmap
 
-- Domain cleanup.
-- Gameplay MVP polish.
 - Tests.
 - CI.
 - Docker.
 - Release packaging.
+- UI visual polish.
+- Static analysis.

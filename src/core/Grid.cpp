@@ -9,7 +9,7 @@ namespace tetris
     Grid::Grid()
         : numRows(kNumRows),
           numCols(kNumCols),
-          grid(numRows, std::vector<int>(numCols, 0))
+          grid(numRows, std::vector<TetrominoType>(numCols, TetrominoType::Empty))
     {
         initialize();
     }
@@ -18,7 +18,7 @@ namespace tetris
     {
         for (auto &row : grid)
         {
-            std::fill(row.begin(), row.end(), 0);
+            std::fill(row.begin(), row.end(), TetrominoType::Empty);
         }
     }
 
@@ -29,14 +29,14 @@ namespace tetris
 
     bool Grid::isCellEmpty(int row, int col) const
     {
-        return !isCellOutside(row, col) && (grid[row][col] == 0);
+        return !isCellOutside(row, col) && (grid[row][col] == TetrominoType::Empty);
     }
 
-    void Grid::setCell(int row, int col, int value)
+    void Grid::setCell(int row, int col, TetrominoType type)
     {
         if (!isCellOutside(row, col))
         {
-            grid[row][col] = value;
+            grid[row][col] = type;
         }
     }
 
@@ -68,7 +68,7 @@ namespace tetris
         return numCols;
     }
 
-    int Grid::cell(int row, int col) const
+    TetrominoType Grid::cell(int row, int col) const
     {
         return grid[row][col];
     }
@@ -77,7 +77,7 @@ namespace tetris
     {
         for (int col = 0; col < numCols; ++col)
         {
-            if (grid[row][col] == 0)
+            if (grid[row][col] == TetrominoType::Empty)
             {
                 return false;
             }
@@ -89,7 +89,7 @@ namespace tetris
     {
         for (int col = 0; col < numCols; ++col)
         {
-            grid[row][col] = 0;
+            grid[row][col] = TetrominoType::Empty;
         }
     }
 

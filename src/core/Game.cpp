@@ -1,41 +1,26 @@
 #include "Game.h"
 
+#include "ScoreSystem.h"
+#include "constants.h"
+
 #include <algorithm>
 
 namespace tetris
 {
     Game::Game()
         : grid_(),
-          randomEngine_(std::random_device{}()),
-          gameOver_(false),
-          gameScore_(0)
+          randomBag_(),
+          currentBlock_(nextRandomBlock()),
+          nextBlock_(nextRandomBlock()),
+          status_(GameStatus::Running),
+          gameScore_(0),
+          totalLinesCleared_(0)
     {
-        blocks_ = getAllBlocks();
-        currentBlock_ = getRandomBlock();
-        nextBlock_ = getRandomBlock();
-    }
-
-    Block Game::getRandomBlock()
-    {
-        if (blocks_.empty())
-        {
-            blocks_ = getAllBlocks();
-        }
-        std::uniform_int_distribution<> dist(0, static_cast<int>(blocks_.size()) - 1);
-        int randomIndex = dist(randomEngine_);
-        Block block = blocks_[randomIndex];
-        blocks_.erase(blocks_.begin() + randomIndex);
-        return block;
-    }
-
-    std::vector<Block> Game::getAllBlocks()
-    {
-        return {I_Block(), J_Block(), L_Block(), O_Block(), S_Block(), T_Block(), Z_Block()};
     }
 
     bool Game::moveBlockLeft()
     {
-        if (gameOver_)
+        if (!isRunning())
         {
             return false;
         }
@@ -51,7 +36,7 @@ namespace tetris
 
     bool Game::moveBlockRight()
     {
-        if (gameOver_)
+        if (!isRunning())
         {
             return false;
         }
@@ -65,12 +50,49 @@ namespace tetris
         return true;
     }
 
-    MoveDownResult Game::moveBlockDown(bool awardSoftDropPoint)
+    DropResult Game::softDrop()
     {
-        MoveDownResult result;
-        if (gameOver_)
+        return moveBlockDown(true);
+    }
+
+    DropResult Game::tickDown()
+    {
+        return moveBlockDown(false);
+    }
+
+    DropResult Game::hardDrop()
+    {
+        DropResult result;
+        if (!isRunning())
         {
-            result.gameOver = true;
+            result.gameOver = isGameOver();
+            return result;
+        }
+
+        while (true)
+        {
+            currentBlock_.move(1, 0);
+            if (isBlockOutside() || !blockFits())
+            {
+                currentBlock_.move(-1, 0);
+                break;
+            }
+            ++result.rowsDropped;
+        }
+
+        addDropScore(ScoreSystem::hardDropScore(result.rowsDropped));
+        result.blockLocked = true;
+        result.linesCleared = lockBlock();
+        result.gameOver = isGameOver();
+        return result;
+    }
+
+    DropResult Game::moveBlockDown(bool awardSoftDropPoint)
+    {
+        DropResult result;
+        if (!isRunning())
+        {
+            result.gameOver = isGameOver();
             return result;
         }
 
@@ -79,21 +101,22 @@ namespace tetris
         {
             currentBlock_.move(-1, 0);
             result.blockLocked = true;
-            result.rowsCleared = lockBlock();
-            result.gameOver = gameOver_;
+            result.linesCleared = lockBlock();
+            result.gameOver = isGameOver();
+            return result;
         }
 
+        result.rowsDropped = 1;
         if (awardSoftDropPoint)
         {
-            updateScore(0, 1);
+            addDropScore(ScoreSystem::softDropScore(1));
         }
-
         return result;
     }
 
     bool Game::rotateBlock()
     {
-        if (gameOver_)
+        if (!isRunning())
         {
             return false;
         }
@@ -107,39 +130,53 @@ namespace tetris
         return true;
     }
 
+    void Game::togglePause()
+    {
+        if (status_ == GameStatus::Running)
+        {
+            status_ = GameStatus::Paused;
+        }
+        else if (status_ == GameStatus::Paused)
+        {
+            status_ = GameStatus::Running;
+        }
+    }
+
     bool Game::isBlockOutside() const
     {
-        const auto tiles = currentBlock_.getCellsPositions();
+        const auto tiles = currentBlock_.cellPositions();
         return std::any_of(tiles.begin(), tiles.end(),
                            [this](const Position &pos) { return grid_.isCellOutside(pos.row, pos.col); });
     }
 
     int Game::lockBlock()
     {
-        const auto tiles = currentBlock_.getCellsPositions();
+        const auto tiles = currentBlock_.cellPositions();
         for (const auto &pos : tiles)
         {
-            grid_.setCell(pos.row, pos.col, currentBlock_.id);
+            grid_.setCell(pos.row, pos.col, currentBlock_.type());
+        }
+
+        int linesCleared = grid_.clearFullRows();
+        if (linesCleared > 0)
+        {
+            totalLinesCleared_ += linesCleared;
+            applyLineClearScore(linesCleared);
         }
 
         currentBlock_ = nextBlock_;
         if (!blockFits())
         {
-            gameOver_ = true;
+            status_ = GameStatus::GameOver;
         }
 
-        nextBlock_ = getRandomBlock();
-        int rowsCleared = grid_.clearFullRows();
-        if (rowsCleared > 0)
-        {
-            updateScore(rowsCleared, 0);
-        }
-        return rowsCleared;
+        nextBlock_ = nextRandomBlock();
+        return linesCleared;
     }
 
     bool Game::blockFits() const
     {
-        const auto tiles = currentBlock_.getCellsPositions();
+        const auto tiles = currentBlock_.cellPositions();
         return std::all_of(tiles.begin(), tiles.end(),
                            [this](const Position &pos) { return grid_.isCellEmpty(pos.row, pos.col); });
     }
@@ -147,21 +184,53 @@ namespace tetris
     void Game::reset()
     {
         grid_.initialize();
-        blocks_ = getAllBlocks();
-        currentBlock_ = getRandomBlock();
-        nextBlock_ = getRandomBlock();
+        randomBag_.reset();
+        currentBlock_ = nextRandomBlock();
+        nextBlock_ = nextRandomBlock();
         gameScore_ = 0;
-        gameOver_ = false;
+        totalLinesCleared_ = 0;
+        status_ = GameStatus::Running;
+    }
+
+    GameStatus Game::status() const
+    {
+        return status_;
+    }
+
+    bool Game::isRunning() const
+    {
+        return status_ == GameStatus::Running;
+    }
+
+    bool Game::isPaused() const
+    {
+        return status_ == GameStatus::Paused;
     }
 
     bool Game::isGameOver() const
     {
-        return gameOver_;
+        return status_ == GameStatus::GameOver;
     }
 
     int Game::score() const
     {
         return gameScore_;
+    }
+
+    int Game::level() const
+    {
+        return (totalLinesCleared_ / 10) + 1;
+    }
+
+    int Game::totalLinesCleared() const
+    {
+        return totalLinesCleared_;
+    }
+
+    double Game::dropIntervalSeconds() const
+    {
+        const double interval = kBaseDropIntervalSeconds - ((level() - 1) * kDropIntervalLevelStepSeconds);
+        return std::max(kMinimumDropIntervalSeconds, interval);
     }
 
     const Grid &Game::grid() const
@@ -179,22 +248,18 @@ namespace tetris
         return nextBlock_;
     }
 
-    void Game::updateScore(int linesCleared, int moveDownPoints)
+    void Game::applyLineClearScore(int linesCleared)
     {
-        switch (linesCleared)
-        {
-            case 1:
-                gameScore_ += 100;
-                break;
-            case 2:
-                gameScore_ += 300;
-                break;
-            case 3:
-                gameScore_ += 500;
-                break;
-            default:
-                break;
-        }
-        gameScore_ += moveDownPoints;
+        gameScore_ += ScoreSystem::lineClearScore(linesCleared, level());
+    }
+
+    void Game::addDropScore(int score)
+    {
+        gameScore_ += score;
+    }
+
+    Block Game::nextRandomBlock()
+    {
+        return makeBlock(randomBag_.next());
     }
 }
