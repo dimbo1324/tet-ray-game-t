@@ -1,6 +1,8 @@
 #ifndef TETRIS_CORE_GRID_H
 #define TETRIS_CORE_GRID_H
 
+#include "TetrominoType.h"
+
 #include <vector>
 
 namespace tetris
@@ -16,7 +18,7 @@ namespace tetris
 
         bool isCellEmpty(int row, int col) const;
 
-        void setCell(int row, int col, int value);
+        void setCell(int row, int col, TetrominoType type);
 
         int clearFullRows();
 
@@ -24,7 +26,7 @@ namespace tetris
 
         int colCount() const;
 
-        int cell(int row, int col) const;
+        TetrominoType cell(int row, int col) const;
 
     private:
         bool isRowFull(int row) const;
@@ -35,7 +37,7 @@ namespace tetris
 
         int numRows;
         int numCols;
-        std::vector<std::vector<int>> grid;
+        std::vector<std::vector<TetrominoType>> grid;
     };
 }
 

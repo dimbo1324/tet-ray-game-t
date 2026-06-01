@@ -1,29 +1,35 @@
 #include "Block.h"
 
 #include <stdexcept>
+#include <utility>
 
 namespace tetris
 {
     Block::Block()
-        : id(0),
-          rotationState(0),
-          rowOffset(0),
-          colOffset(0)
+        : Block(TetrominoType::Empty)
+    {
+    }
+
+    Block::Block(TetrominoType type)
+        : type_(type),
+          rotationState_(0),
+          rowOffset_(0),
+          colOffset_(0)
     {
     }
 
     void Block::move(int rowDelta, int colDelta)
     {
-        rowOffset += rowDelta;
-        colOffset += colDelta;
+        rowOffset_ += rowDelta;
+        colOffset_ += colDelta;
     }
 
-    std::vector<Position> Block::getCellsPositions() const
+    std::vector<Position> Block::cellPositions() const
     {
-        auto it = cells.find(rotationState);
-        if (it == cells.end())
+        auto it = cells_.find(rotationState_);
+        if (it == cells_.end())
         {
-            throw std::out_of_range("Invalid rotation state in Block::getCellsPositions()");
+            throw std::out_of_range("Invalid rotation state in Block::cellPositions()");
         }
 
         const auto &baseTiles = it->second;
@@ -32,99 +38,146 @@ namespace tetris
 
         for (const auto &pos : baseTiles)
         {
-            movedTiles.emplace_back(pos.row + rowOffset, pos.col + colOffset);
+            movedTiles.push_back({pos.row + rowOffset_, pos.col + colOffset_});
         }
         return movedTiles;
     }
 
     void Block::rotate()
     {
-        if (cells.empty())
+        if (cells_.empty())
         {
             throw std::runtime_error("Block cells are empty");
         }
-        rotationState = (rotationState + 1) % cells.size();
+        rotationState_ = (rotationState_ + 1) % static_cast<int>(cells_.size());
     }
 
     void Block::undoRotation()
     {
-        if (cells.empty())
+        if (cells_.empty())
         {
             throw std::runtime_error("Block cells are empty");
         }
-        rotationState = (rotationState == 0) ? static_cast<int>(cells.size() - 1) : rotationState - 1;
+        rotationState_ = (rotationState_ == 0) ? static_cast<int>(cells_.size() - 1) : rotationState_ - 1;
     }
 
-    I_Block::I_Block() : Block()
+    TetrominoType Block::type() const
     {
-        id = 3;
-        cells = {
-            {0, {Position(1, 0), Position(1, 1), Position(1, 2), Position(1, 3)}},
-            {1, {Position(0, 2), Position(1, 2), Position(2, 2), Position(3, 2)}},
-            {2, {Position(2, 0), Position(2, 1), Position(2, 2), Position(2, 3)}},
-            {3, {Position(0, 1), Position(1, 1), Position(2, 1), Position(3, 1)}}};
+        return type_;
+    }
+
+    bool Block::isEmpty() const
+    {
+        return type_ == TetrominoType::Empty;
+    }
+
+    int Block::rotationState() const
+    {
+        return rotationState_;
+    }
+
+    int Block::rowOffset() const
+    {
+        return rowOffset_;
+    }
+
+    int Block::colOffset() const
+    {
+        return colOffset_;
+    }
+
+    void Block::setCells(std::map<int, std::vector<Position>> cells)
+    {
+        cells_ = std::move(cells);
+    }
+
+    Block makeBlock(TetrominoType type)
+    {
+        switch (type)
+        {
+            case TetrominoType::I:
+                return I_Block();
+            case TetrominoType::J:
+                return J_Block();
+            case TetrominoType::L:
+                return L_Block();
+            case TetrominoType::O:
+                return O_Block();
+            case TetrominoType::S:
+                return S_Block();
+            case TetrominoType::T:
+                return T_Block();
+            case TetrominoType::Z:
+                return Z_Block();
+            case TetrominoType::Empty:
+                break;
+        }
+        return Block();
+    }
+
+    I_Block::I_Block() : Block(TetrominoType::I)
+    {
+        setCells({
+            {0, {{1, 0}, {1, 1}, {1, 2}, {1, 3}}},
+            {1, {{0, 2}, {1, 2}, {2, 2}, {3, 2}}},
+            {2, {{2, 0}, {2, 1}, {2, 2}, {2, 3}}},
+            {3, {{0, 1}, {1, 1}, {2, 1}, {3, 1}}}});
         move(0, 3);
     }
 
-    J_Block::J_Block() : Block()
+    J_Block::J_Block() : Block(TetrominoType::J)
     {
-        id = 2;
-        cells = {
-            {0, {Position(0, 0), Position(1, 0), Position(1, 1), Position(1, 2)}},
-            {1, {Position(0, 1), Position(0, 2), Position(1, 1), Position(2, 1)}},
-            {2, {Position(1, 0), Position(1, 1), Position(1, 2), Position(2, 2)}},
-            {3, {Position(0, 1), Position(1, 1), Position(2, 0), Position(2, 1)}}};
+        setCells({
+            {0, {{0, 0}, {1, 0}, {1, 1}, {1, 2}}},
+            {1, {{0, 1}, {0, 2}, {1, 1}, {2, 1}}},
+            {2, {{1, 0}, {1, 1}, {1, 2}, {2, 2}}},
+            {3, {{0, 1}, {1, 1}, {2, 0}, {2, 1}}}});
         move(0, 3);
     }
 
-    L_Block::L_Block() : Block()
+    L_Block::L_Block() : Block(TetrominoType::L)
     {
-        id = 1;
-        cells = {
-            {0, {Position(0, 2), Position(1, 0), Position(1, 1), Position(1, 2)}},
-            {1, {Position(0, 1), Position(1, 1), Position(2, 1), Position(2, 2)}},
-            {2, {Position(1, 0), Position(1, 1), Position(1, 2), Position(2, 0)}},
-            {3, {Position(0, 0), Position(0, 1), Position(1, 1), Position(2, 1)}}};
+        setCells({
+            {0, {{0, 2}, {1, 0}, {1, 1}, {1, 2}}},
+            {1, {{0, 1}, {1, 1}, {2, 1}, {2, 2}}},
+            {2, {{1, 0}, {1, 1}, {1, 2}, {2, 0}}},
+            {3, {{0, 0}, {0, 1}, {1, 1}, {2, 1}}}});
         move(0, 3);
     }
 
-    O_Block::O_Block() : Block()
+    O_Block::O_Block() : Block(TetrominoType::O)
     {
-        id = 4;
-        cells = {{0, {Position(0, 0), Position(0, 1), Position(1, 0), Position(1, 1)}}};
+        setCells({{0, {{0, 0}, {0, 1}, {1, 0}, {1, 1}}}});
         move(0, 3);
     }
 
-    S_Block::S_Block() : Block()
+    S_Block::S_Block() : Block(TetrominoType::S)
     {
-        id = 5;
-        cells = {
-            {0, {Position(0, 1), Position(0, 2), Position(1, 0), Position(1, 1)}},
-            {1, {Position(0, 1), Position(1, 1), Position(1, 2), Position(2, 2)}},
-            {2, {Position(1, 1), Position(1, 2), Position(2, 0), Position(2, 1)}},
-            {3, {Position(0, 0), Position(1, 0), Position(1, 1), Position(2, 1)}}};
+        setCells({
+            {0, {{0, 1}, {0, 2}, {1, 0}, {1, 1}}},
+            {1, {{0, 1}, {1, 1}, {1, 2}, {2, 2}}},
+            {2, {{1, 1}, {1, 2}, {2, 0}, {2, 1}}},
+            {3, {{0, 0}, {1, 0}, {1, 1}, {2, 1}}}});
         move(0, 3);
     }
 
-    T_Block::T_Block() : Block()
+    T_Block::T_Block() : Block(TetrominoType::T)
     {
-        id = 6;
-        cells = {
-            {0, {Position(0, 1), Position(1, 0), Position(1, 1), Position(1, 2)}},
-            {1, {Position(0, 1), Position(1, 1), Position(1, 2), Position(2, 1)}},
-            {2, {Position(1, 0), Position(1, 1), Position(1, 2), Position(2, 1)}},
-            {3, {Position(0, 1), Position(1, 0), Position(1, 1), Position(2, 1)}}};
+        setCells({
+            {0, {{0, 1}, {1, 0}, {1, 1}, {1, 2}}},
+            {1, {{0, 1}, {1, 1}, {1, 2}, {2, 1}}},
+            {2, {{1, 0}, {1, 1}, {1, 2}, {2, 1}}},
+            {3, {{0, 1}, {1, 0}, {1, 1}, {2, 1}}}});
         move(0, 3);
     }
 
-    Z_Block::Z_Block() : Block()
+    Z_Block::Z_Block() : Block(TetrominoType::Z)
     {
-        id = 7;
-        cells = {
-            {0, {Position(0, 0), Position(0, 1), Position(1, 1), Position(1, 2)}},
-            {1, {Position(0, 2), Position(1, 1), Position(1, 2), Position(2, 1)}},
-            {2, {Position(1, 0), Position(1, 1), Position(2, 1), Position(2, 2)}},
-            {3, {Position(0, 1), Position(1, 0), Position(1, 1), Position(2, 0)}}};
+        setCells({
+            {0, {{0, 0}, {0, 1}, {1, 1}, {1, 2}}},
+            {1, {{0, 2}, {1, 1}, {1, 2}, {2, 1}}},
+            {2, {{1, 0}, {1, 1}, {2, 1}, {2, 2}}},
+            {3, {{0, 1}, {1, 0}, {1, 1}, {2, 0}}}});
         move(0, 3);
     }
 }
