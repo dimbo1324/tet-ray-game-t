@@ -18,11 +18,11 @@ namespace tetris
         constexpr int kYUiTextPosition = kCellSize * 15 / kCellSize;
         constexpr int kFontSizeUiText = kCellSize / 1.5;
 
-        constexpr const char *kMusicFile = "../sounds/music.mp3";
-        constexpr const char *kRotateSoundFile = "../sounds/rotate.mp3";
-        constexpr const char *kClearSoundFile = "../sounds/clear.mp3";
+        constexpr const char *kMusicFile = "sounds/music.mp3";
+        constexpr const char *kRotateSoundFile = "sounds/rotate.mp3";
+        constexpr const char *kClearSoundFile = "sounds/clear.mp3";
         constexpr const char *kFontFile =
-                "../../Tetris/fonts/Press_Start_2P/PressStart2P-Regular.ttf";
+                "fonts/Press_Start_2P/PressStart2P-Regular.ttf";
     }
 
 #endif
