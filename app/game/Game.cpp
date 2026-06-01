@@ -1,5 +1,5 @@
 #include "Game.h"
-#include "Constants.h"
+#include "constants.h"
 #include "../blocks/Block.h"
 #include <stdexcept>
 #include <algorithm>

@@ -1,109 +1,113 @@
 # Tet-Ray-Game
 
-**Tet-Ray-Game** — аналог легендарного Тетриса, который когда-то завоёвывал сердца геймеров на приставках, а теперь обрёл новую жизнь на C++ с помощью библиотеки [Raylib](https://www.raylib.com/). Этот проект — не только дань классике, но и мощный способ прокачать свои навыки программирования и разрабатывать проекты, в которые хочется вкладывать душу.
+Modern C++23 Tetris game built with Raylib and portable CMake.
 
----
+## Project Description
 
-## 📖 Описание проекта
+Tet-Ray-Game is a classic Tetris-style game implemented in C++ with Raylib for rendering, input, and audio. The current milestone keeps the gameplay code intact and establishes a portable build baseline for future development.
 
-Проект **Tet-Ray-Game** создан для реализации классического игрового процесса Тетриса. Здесь каждая строчка кода дышит ностальгией по старым временам, а каждая деталь продумана для удобства дальнейших улучшений. Игра помогает не только вспомнить золотые моменты гейминга, но и вдохновляет на новые свершения в мире C++ разработки.
+## Current Status
 
----
+Implemented:
 
-## 🎯 Цели проекта
+- Classic Tetris gameplay baseline.
+- Raylib rendering and audio.
+- Score tracking.
+- Next piece preview.
+- Game over and restart flow.
+- Portable CMake baseline.
+- C++23 baseline.
 
-- **Воплощение легенды:** Создать аналог культовой игры Тетрис с современным подходом.
-- **Оттачивание скиллов:** Закрепить и развить навыки C++ разработки, от работы с графикой до продуманной архитектуры.
-- **Безграничные возможности:** Проект можно использовать как в коммерческих, так и в некоммерческих целях, ведь творчество не имеет границ!
+Planned:
 
----
+- Asset portability improvements.
+- Core/rendering separation.
+- Unit tests.
+- CI.
+- Docker build.
+- Release packaging.
+- UI polish.
 
-## ⚙️ Особенности
+## Requirements
 
-- **Модульность:** Проект разбит на несколько ключевых компонентов:
-  - **Grid:** Отвечает за создание и отрисовку игрового поля.
-  - **Blocks:** Реализует различные типы блоков (I, J, L, O, S, T, Z) с возможностью поворота и кастомизации.
-  - **Colors:** Предоставляет продуманную цветовую палитру для стилизации блоков и сетки.
-  - **Positions:** Вычисляет и хранит координаты блоков для плавного движения и анимации.
+- CMake 3.28 or newer.
+- A compiler with C++23 support.
+- Git.
+- Internet connection for the first Raylib FetchContent download.
 
-- **Графика через Raylib:** Визуальные решения выполнены с использованием Raylib — простой и мощной библиотеки для создания игр на C++.
+Potential compiler choices include recent versions of MSVC, GCC, or Clang. Exact platform/compiler support has not yet been fully certified.
 
-- **Простота расширения:** Дизайн проекта позволяет легко добавлять новые функции, режимы игры или изменять логику, делая его идеальной базой для будущих инноваций.
+## Build Instructions
 
-- **Вдохновение и креатив:** Код написан с любовью и долей юмора, чтобы даже самые скучные моменты сборки превращались в творческий процесс.
+Configure and build the Debug preset:
 
----
-
-## 📂 Структура проекта
-
-```
-Tet-Ray-Game-main/
-├── app
-│   ├── blocks
-│   │   └── TypesOfBlocks
-│   │       └── cpp
-│   │           ├── I_Block.cpp
-│   │           ├── J_Block.cpp
-│   │           ├── L_Block.cpp
-│   │           ├── O_Block.cpp
-│   │           ├── S_Block.cpp
-│   │           ├── T_Block.cpp
-│   │           └── Z_Block.cpp
-│   ├── colors
-│   │   ├── Colors.cpp
-│   │   └── Colors.h
-│   ├── grid
-│   │   ├── grid.cpp
-│   │   └── grid.h
-│   ├── positions
-│   │   ├── Position.cpp
-│   │   └── Position.h
-│   └── main.cpp
-├── build
-├── cmake-build-debug
-├── cmake-build-debug-mingw
-└── CMakeLists.txt
+```bash
+cmake --preset debug
+cmake --build --preset debug
 ```
 
-Каждая директория аккуратно организована, чтобы код был понятен и удобно расширяем. Всё, от базовых функций до обработки графики, выполнено в духе "делаем всё как надо, но с душой".
+Configure and build the Release preset:
 
----
+```bash
+cmake --preset release
+cmake --build --preset release
+```
 
-## 🚀 Как собрать и запустить
+Raylib is downloaded automatically by CMake through FetchContent on the first configure.
 
-1. **Подготовка:**
-   - Убедись, что на твоей системе установлен [CMake](https://cmake.org/) и компилятор, поддерживающий C++.
+## Run Instructions
 
-2. **Сборка проекта:**
+After building, the executable is expected in the selected preset build directory:
 
-   ```bash
-   mkdir build
-   cd build
-   cmake ..
-   make
-   ```
+- Debug: `build/debug/tet_ray_game_app` or `build/debug/tet_ray_game_app.exe`
+- Release: `build/release/tet_ray_game_app` or `build/release/tet_ray_game_app.exe`
 
-3. **Запуск игры:**
-   - После успешной сборки исполняемый файл (например, `Tetris.exe` или `Tetris` на Linux/Mac) появится в папке сборки. Запусти его командой:
+The build copies `fonts/` and `sounds/` beside the executable. Run the game from the executable directory, for example:
 
-   ```bash
-   ./Tetris
-   ```
+```bash
+cd build/debug
+./tet_ray_game_app
+```
 
----
+On Windows PowerShell:
 
-## 🎮 Как играть
+```powershell
+cd build/debug
+./tet_ray_game_app.exe
+```
 
-На данный момент игра демонстрирует базовую отрисовку сетки и блоков. Каждый блок представлен в своём стиле, а графика выполнена на высшем уровне, чтобы ты почувствовал, как будто снова сидишь перед старенькой консолью, только с суперсовременным апгрейдом.
+The project still uses simple relative asset paths. A fuller asset-loading layer is planned for a later milestone.
 
----
+## Repository Hygiene
 
-## 🤝 Как помочь проекту
+- Generated build folders and compiler outputs are ignored.
+- Use `build/debug` and `build/release` through CMake presets.
+- Do not commit generated build directories, CMake caches, binaries, or IDE metadata.
 
-Если у тебя есть идеи по улучшению проекта, ошибки, которые нужно исправить, или просто хочешь внести свой вклад — присылай pull request! Будем рады любой помощи, потому что вместе мы можем превратить этот проект в шедевр, достойный уважения!
+## Project Layout
 
----
+```text
+.
+|-- app/
+|   |-- blocks/
+|   |-- colors/
+|   |-- game/
+|   |-- grid/
+|   |-- positions/
+|   `-- main.cpp
+|-- fonts/
+|-- sounds/
+|-- CMakeLists.txt
+|-- CMakePresets.json
+`-- README.md
+```
 
-## 📜 Лицензия
+## Roadmap
 
-Проект распространяется под лицензией, позволяющей свободное использование в коммерческих и некоммерческих целях. Ознакомься с файлом LICENSE для подробностей.
+- Portable assets.
+- Architecture split between core gameplay, rendering, audio, and input.
+- Gameplay polish.
+- Tests.
+- CI.
+- Docker.
+- Release packaging.

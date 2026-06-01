@@ -1,0 +1,46 @@
+# CMake/build
+build/
+build-*/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+CTestTestfile.cmake
+DartConfiguration.tcl
+Testing/
+compile_commands.json
+
+# Generated build files
+Makefile
+*.ninja
+.ninja_deps
+.ninja_log
+
+# Binaries/libraries
+*.exe
+*.dll
+*.so
+*.dylib
+*.a
+*.lib
+*.o
+*.obj
+*.pdb
+*.ilk
+*.exp
+
+# IDE/editor
+.vscode/
+.idea/
+*.user
+*.suo
+*.vcxproj.user
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs/temp
+*.log
+*.tmp
+*.bak
