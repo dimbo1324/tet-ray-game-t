@@ -20,16 +20,39 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(raylib)
 
+add_library(tet_ray_game_core STATIC)
+
+target_sources(tet_ray_game_core
+    PRIVATE
+        src/core/Block.cpp
+        src/core/Game.cpp
+        src/core/Grid.cpp
+        src/core/Position.cpp
+)
+
+target_compile_features(tet_ray_game_core PUBLIC cxx_std_23)
+
+set_target_properties(tet_ray_game_core
+    PROPERTIES
+        CXX_EXTENSIONS OFF
+        CXX_SCAN_FOR_MODULES OFF
+)
+
+target_include_directories(tet_ray_game_core
+    PUBLIC
+        ${PROJECT_SOURCE_DIR}/src
+)
+
 add_executable(tet_ray_game_app)
 
 target_sources(tet_ray_game_app
     PRIVATE
-        app/main.cpp
-        app/blocks/Block.cpp
-        app/colors/Colors.cpp
-        app/game/Game.cpp
-        app/grid/Grid.cpp
-        app/positions/Position.cpp
+        src/app/main.cpp
+        src/assets/ResourcePaths.cpp
+        src/audio/AudioService.cpp
+        src/input/InputController.cpp
+        src/rendering/Colors.cpp
+        src/rendering/RaylibRenderer.cpp
 )
 
 target_compile_features(tet_ray_game_app PRIVATE cxx_std_23)
@@ -42,17 +65,19 @@ set_target_properties(tet_ray_game_app
 
 target_include_directories(tet_ray_game_app
     PRIVATE
-        ${PROJECT_SOURCE_DIR}/app
+        ${PROJECT_SOURCE_DIR}/src
 )
 
-target_link_libraries(tet_ray_game_app PRIVATE raylib)
+target_link_libraries(tet_ray_game_app
+    PRIVATE
+        tet_ray_game_core
+        raylib
+)
 
-foreach(asset_dir IN ITEMS fonts sounds)
-    add_custom_command(TARGET tet_ray_game_app POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-            ${PROJECT_SOURCE_DIR}/${asset_dir}
-            $<TARGET_FILE_DIR:tet_ray_game_app>/${asset_dir}
-        COMMENT "Copying ${asset_dir} assets"
-        VERBATIM
-    )
-endforeach()
+add_custom_command(TARGET tet_ray_game_app POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${PROJECT_SOURCE_DIR}/assets
+        $<TARGET_FILE_DIR:tet_ray_game_app>/assets
+    COMMENT "Copying game assets"
+    VERBATIM
+)
