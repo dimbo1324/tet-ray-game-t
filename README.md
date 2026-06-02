@@ -25,15 +25,18 @@ Implemented:
 - Hard drop.
 - Soft and hard drop scoring.
 - Level and speed progression.
+- Unit tests with Catch2 and CTest.
+- Cross-platform GitHub Actions CI for Linux, Windows, and macOS.
+- Docker build/test/package environment.
+- Release packaging through CMake install rules and helper scripts.
 
-Planned:
+Still planned:
 
-- Unit tests.
-- CI.
-- Docker build.
-- Release packaging.
 - UI visual polish.
-- Static analysis.
+- Screenshots and documentation polish.
+- Static analysis hardening.
+- Optional Docker GUI runner.
+- Optional gameplay additions such as ghost piece, hold piece, and persistent high score.
 
 ## Requirements
 
@@ -61,6 +64,95 @@ cmake --build --preset release
 ```
 
 Raylib is downloaded automatically by CMake through FetchContent on the first configure.
+
+For a clean build, remove generated preset directories and configure again:
+
+```bash
+rm -rf build/debug build/release dist
+cmake --preset debug
+cmake --build --preset debug
+```
+
+On Windows PowerShell:
+
+```powershell
+Remove-Item -Recurse -Force build/debug, build/release, dist -ErrorAction SilentlyContinue
+cmake --preset debug
+cmake --build --preset debug
+```
+
+## Testing
+
+Tests are enabled by default through `TET_RAY_GAME_BUILD_TESTS=ON`. Configure, build, and run them with:
+
+```bash
+cmake --preset debug
+cmake --build --preset debug
+ctest --test-dir build/debug --output-on-failure
+```
+
+The test target is `tet_ray_game_tests` and links against `tet_ray_game_core` plus Catch2. The core boundary check keeps `src/core` independent from Raylib:
+
+```bash
+bash scripts/check-core-boundary.sh
+```
+
+## Continuous Integration
+
+GitHub Actions runs Debug configure/build/test and Release configure/build/install on:
+
+- `ubuntu-latest`
+- `windows-latest`
+- `macos-latest`
+
+The Ubuntu job also runs `scripts/check-core-boundary.sh`. CI uses Ninja through `CMAKE_GENERATOR=Ninja` and installs the platform dependencies needed for Raylib builds.
+
+## Docker Build Environment
+
+Build the Docker image:
+
+```bash
+docker build -t tet-ray-game-builder .
+```
+
+Run the full build/test/package workflow in the container:
+
+```bash
+docker run --rm -v "$PWD:/workspace" -w /workspace tet-ray-game-builder
+```
+
+Or use Compose:
+
+```bash
+docker compose up --build builder
+```
+
+The Docker workflow is intended for build, tests, and release packaging. It does not run the graphical game window.
+Inside the container, builds use `build/docker-debug` and `build/docker-release` to avoid clashing with host preset build directories.
+
+## Release Packaging
+
+Create a release layout with CMake directly:
+
+```bash
+cmake --preset release
+cmake --build --preset release
+cmake --install build/release --prefix dist
+```
+
+Or use the helper scripts:
+
+```bash
+bash scripts/package-release.sh
+```
+
+On Windows PowerShell:
+
+```powershell
+./scripts/package-release.ps1
+```
+
+The generated `dist/` directory contains the executable, `assets/fonts`, `assets/sounds`, and `README.md`.
 
 ## Run Instructions
 
@@ -158,6 +250,9 @@ Missing assets are reported to `std::cerr` before Raylib attempts to load them.
 |-- assets/
 |   |-- fonts/
 |   `-- sounds/
+|-- .github/
+|   `-- workflows/
+|-- scripts/
 |-- src/
 |   |-- app/
 |   |-- assets/
@@ -165,6 +260,7 @@ Missing assets are reported to `std::cerr` before Raylib attempts to load them.
 |   |-- core/
 |   |-- input/
 |   `-- rendering/
+|-- tests/
 |-- CMakeLists.txt
 |-- CMakePresets.json
 `-- README.md
@@ -172,9 +268,8 @@ Missing assets are reported to `std::cerr` before Raylib attempts to load them.
 
 ## Roadmap
 
-- Tests.
-- CI.
-- Docker.
-- Release packaging.
 - UI visual polish.
-- Static analysis.
+- Screenshots and documentation polish.
+- Static analysis hardening.
+- Optional Docker GUI runner.
+- Optional ghost piece, hold piece, and persistent high score.

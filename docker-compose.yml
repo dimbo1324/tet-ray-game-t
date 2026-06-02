@@ -1,0 +1,16 @@
+services:
+  builder:
+    build: .
+    image: tet-ray-game-builder
+    working_dir: /workspace
+    volumes:
+      - .:/workspace
+    environment:
+      CMAKE_GENERATOR: Ninja
+    command: >
+      bash -lc "cmake -S . -B build/docker-debug -DCMAKE_BUILD_TYPE=Debug
+      && cmake --build build/docker-debug
+      && ctest --test-dir build/docker-debug --output-on-failure
+      && cmake -S . -B build/docker-release -DCMAKE_BUILD_TYPE=Release
+      && cmake --build build/docker-release
+      && cmake --install build/docker-release --prefix dist"

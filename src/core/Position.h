@@ -7,6 +7,8 @@ namespace tetris
     {
         int row{};
         int col{};
+
+        constexpr bool operator==(const Position &other) const = default;
     };
 }
 
