@@ -16,6 +16,9 @@ Current tests cover:
 
 - 7-bag randomizer behavior and deterministic seeds.
 - ScoreSystem line, soft drop, and hard drop scoring.
+- LevelSystem level/drop interval progression.
+- TetrominoType cell-index mapping.
+- ResourcePaths asset root, font, and sound path resolution.
 - Grid empty state, bounds, cell access, and row clearing.
 - Block creation, rotation, undo, and movement.
 - Game initial state, pause behavior, drops, reset, and game-over blocking.
@@ -27,6 +30,18 @@ bash scripts/check-core-boundary.sh
 ```
 
 This check keeps `src/core` free from Raylib APIs.
+
+## README Links
+
+```bash
+bash scripts/check-readme-links.sh
+```
+
+PowerShell:
+
+```powershell
+./scripts/check-readme-links.ps1
+```
 
 ## Static Analysis Helpers
 

@@ -9,8 +9,8 @@ if (Test-Path $distDir) {
     Remove-Item -Recurse -Force $distDir
 }
 
-cmake --preset release
-cmake --build --preset release
-cmake --install build/release --prefix dist
+cmake --preset release-no-tests
+cmake --build --preset release-no-tests
+cmake --install build/release-no-tests --prefix dist
 
 Write-Host "Release package created at: $distDir"

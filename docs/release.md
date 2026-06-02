@@ -10,6 +10,14 @@ cmake --build --preset release
 cmake --install build/release --prefix dist
 ```
 
+For package-only release builds without Catch2 test targets:
+
+```bash
+cmake --preset release-no-tests
+cmake --build --preset release-no-tests
+cmake --install build/release-no-tests --prefix dist
+```
+
 ## Helper Scripts
 
 Linux/macOS:
@@ -32,10 +40,11 @@ dist/
 |-- assets/
 |   |-- fonts/
 |   `-- sounds/
+|-- LICENSE
 `-- README.md
 ```
 
-If a root `LICENSE` file is added later, CMake will install it into `dist/`.
+The root `LICENSE` file is installed into `dist/`.
 
 ## Notes
 

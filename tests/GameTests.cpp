@@ -1,6 +1,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "core/Game.h"
+#include "core/LevelSystem.h"
 #include "core/ScoreSystem.h"
 
 TEST_CASE("Game starts in initial running state")
@@ -12,6 +13,7 @@ TEST_CASE("Game starts in initial running state")
     CHECK(game.score() == 0);
     CHECK(game.level() == 1);
     CHECK(game.totalLinesCleared() == 0);
+    CHECK(game.dropIntervalSeconds() == tetris::LevelSystem::dropIntervalForLevel(1));
 }
 
 TEST_CASE("Game toggles pause and resume")

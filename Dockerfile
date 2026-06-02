@@ -3,7 +3,17 @@ FROM ubuntu:24.04
 ENV DEBIAN_FRONTEND=noninteractive
 ENV CMAKE_GENERATOR=Ninja
 
+ARG UBUNTU_MIRROR=
+
 RUN set -eux; \
+    mirror="${UBUNTU_MIRROR%/}"; \
+    if [ -n "$mirror" ]; then \
+        find /etc/apt -type f \( -name 'sources.list' -o -name '*.sources' \) -exec sed -i \
+            -e "s|http://archive.ubuntu.com/ubuntu/|$mirror|g" \
+            -e "s|http://archive.ubuntu.com/ubuntu|$mirror|g" \
+            -e "s|http://security.ubuntu.com/ubuntu/|$mirror|g" \
+            -e "s|http://security.ubuntu.com/ubuntu|$mirror|g" {} +; \
+    fi; \
     packages="build-essential ca-certificates cmake git libasound2-dev libgl1-mesa-dev libudev-dev libx11-dev libxcursor-dev libxi-dev libxinerama-dev libxrandr-dev ninja-build pkg-config"; \
     for attempt in 1 2 3 4 5; do \
         apt-get -o Acquire::Retries=5 update || true; \

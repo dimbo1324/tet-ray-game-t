@@ -2,6 +2,7 @@
 
 #include "Colors.h"
 #include "RenderingConstants.h"
+#include "UiLayout.h"
 #include "UiTheme.h"
 
 #include <algorithm>
@@ -58,17 +59,15 @@ namespace tetris
         BeginDrawing();
         ClearBackground(kThemeBackground);
 
-        DrawTextEx(font_, "TETRAY", {26.0f, 12.0f}, 26.0f, 1.0f, kThemeText);
-        DrawTextEx(font_, "C++23 / RAYLIB", {33.0f, 43.0f}, 11.0f, 1.0f, kThemeMutedText);
+        const UiLayout layout = makeUiLayout();
 
-        DrawRectangleRounded({8.0f, 70.0f, static_cast<float>(kBoardPixelWidth + 14),
-                              static_cast<float>(kBoardPixelHeight + 14)},
-                             0.035f, 8, kThemeBoardBackground);
-        DrawRectangleRoundedLines({8.0f, 70.0f, static_cast<float>(kBoardPixelWidth + 14),
-                                   static_cast<float>(kBoardPixelHeight + 14)},
-                                  0.035f, 8, kThemePanelBorder);
+        DrawTextEx(font_, "TETRAY", layout.titlePosition, 26.0f, 1.0f, kThemeText);
+        DrawTextEx(font_, "C++23 / RAYLIB", layout.subtitlePosition, 11.0f, 1.0f, kThemeMutedText);
+
+        DrawRectangleRounded(layout.boardFrame, 0.035f, 8, kThemeBoardBackground);
+        DrawRectangleRoundedLines(layout.boardFrame, 0.035f, 8, kThemePanelBorder);
         drawGrid(game.grid());
-        drawBlock(game.currentBlock(), kExtraPixels, kExtraPixels);
+        drawBlock(game.currentBlock(), layout.boardOriginX, layout.boardOriginY);
 
         drawSidePanel(game);
         drawNextBlock(game.nextBlock());
@@ -79,11 +78,12 @@ namespace tetris
 
     void RaylibRenderer::drawGrid(const Grid &grid) const
     {
+        const UiLayout layout = makeUiLayout();
         for (int row = 0; row < grid.rowCount(); ++row)
         {
             for (int col = 0; col < grid.colCount(); ++col)
             {
-                drawCell(col * kCellSize + kExtraPixels, row * kCellSize + kExtraPixels + 70, kCellSize - 1,
+                drawCell(col * kCellSize + layout.boardOriginX, row * kCellSize + layout.boardOriginY, kCellSize - 1,
                          colorFor(grid.cell(row, col)));
             }
         }
@@ -94,8 +94,7 @@ namespace tetris
         const auto tiles = block.cellPositions();
         for (const auto &pos : tiles)
         {
-            drawCell(pos.col * kCellSize + offsetX, pos.row * kCellSize + offsetY + 70, kCellSize - 1,
-                     colorFor(block.type()));
+            drawCell(pos.col * kCellSize + offsetX, pos.row * kCellSize + offsetY, kCellSize - 1, colorFor(block.type()));
         }
     }
 
@@ -112,46 +111,50 @@ namespace tetris
         const auto [minColIt, maxColIt] = std::minmax_element(
             tiles.begin(), tiles.end(), [](const Position &left, const Position &right) { return left.col < right.col; });
 
-        constexpr int previewCellSize = 24;
-        const int previewWidth = (maxColIt->col - minColIt->col + 1) * previewCellSize;
-        const int previewHeight = (maxRowIt->row - minRowIt->row + 1) * previewCellSize;
-        const int startX = kSidePanelX + (kSidePanelWidth - previewWidth) / 2;
-        const int startY = 258 + (118 - previewHeight) / 2;
+        const UiLayout layout = makeUiLayout();
+        const int previewWidth = (maxColIt->col - minColIt->col + 1) * kNextPreviewCellSize;
+        const int previewHeight = (maxRowIt->row - minRowIt->row + 1) * kNextPreviewCellSize;
+        const int startX = static_cast<int>(layout.nextPreview.x + (layout.nextPreview.width - previewWidth) / 2.0f);
+        const int startY = static_cast<int>(layout.nextPreview.y + (layout.nextPreview.height - previewHeight) / 2.0f);
 
         for (const auto &pos : tiles)
         {
-            const int x = startX + (pos.col - minColIt->col) * previewCellSize;
-            const int y = startY + (pos.row - minRowIt->row) * previewCellSize;
-            drawCell(x, y, previewCellSize - 1, colorFor(block.type()));
+            const int x = startX + (pos.col - minColIt->col) * kNextPreviewCellSize;
+            const int y = startY + (pos.row - minRowIt->row) * kNextPreviewCellSize;
+            drawCell(x, y, kNextPreviewCellSize - 1, colorFor(block.type()));
         }
     }
 
     void RaylibRenderer::drawSidePanel(const Game &game) const
     {
-        drawPanel({static_cast<float>(kSidePanelX), 24.0f, static_cast<float>(kSidePanelWidth), 146.0f}, "SCORE");
+        const UiLayout layout = makeUiLayout();
+        drawPanel(layout.scorePanel, "SCORE");
 
         char scoreText[16];
         std::snprintf(scoreText, sizeof(scoreText), "%d", game.score());
-        drawTextCentered(scoreText, {static_cast<float>(kSidePanelX + 12), 64.0f, static_cast<float>(kSidePanelWidth - 24), 36.0f},
-                         28.0f, kThemeAccent);
+        drawTextCentered(scoreText, layout.scoreValue, 28.0f, kThemeAccent);
 
         char levelText[24];
         std::snprintf(levelText, sizeof(levelText), "LEVEL %d", game.level());
-        DrawTextEx(font_, levelText, {static_cast<float>(kSidePanelX + 20), 116.0f}, 14.0f, 1.0f, kThemeText);
+        DrawTextEx(font_, levelText, layout.levelPosition, 14.0f, 1.0f, kThemeText);
 
         char linesText[24];
         std::snprintf(linesText, sizeof(linesText), "LINES %d", game.totalLinesCleared());
-        DrawTextEx(font_, linesText, {static_cast<float>(kSidePanelX + 20), 140.0f}, 14.0f, 1.0f, kThemeText);
+        DrawTextEx(font_, linesText, layout.linesPosition, 14.0f, 1.0f, kThemeText);
 
-        drawPanel({static_cast<float>(kSidePanelX), 205.0f, static_cast<float>(kSidePanelWidth), 175.0f}, "NEXT");
+        DrawRectangleRounded(layout.statusBadge, 0.18f, 6, game.isPaused() ? Fade(kThemeWarning, 0.24f) : Fade(kThemeAccent, 0.16f));
+        DrawRectangleRoundedLines(layout.statusBadge, 0.18f, 6, game.isPaused() ? kThemeWarning : kThemePanelBorder);
+        drawTextCentered(game.isPaused() ? "PAUSED" : "LIVE", layout.statusBadge, 9.0f, game.isPaused() ? kThemeWarning : kThemeMutedText);
 
-        drawPanel({static_cast<float>(kSidePanelX), 410.0f, static_cast<float>(kSidePanelWidth), 205.0f}, "CONTROLS");
-        DrawTextEx(font_, "< >  MOVE", {static_cast<float>(kSidePanelX + 20), 456.0f}, 12.0f, 1.0f, kThemeMutedText);
-        DrawTextEx(font_, "^    ROTATE", {static_cast<float>(kSidePanelX + 20), 482.0f}, 12.0f, 1.0f, kThemeMutedText);
-        DrawTextEx(font_, "v    SOFT DROP", {static_cast<float>(kSidePanelX + 20), 508.0f}, 12.0f, 1.0f, kThemeMutedText);
-        DrawTextEx(font_, "SPACE HARD DROP", {static_cast<float>(kSidePanelX + 20), 534.0f}, 12.0f, 1.0f, kThemeMutedText);
-        DrawTextEx(font_, "P/ESC PAUSE", {static_cast<float>(kSidePanelX + 20), 560.0f}, 12.0f, 1.0f, kThemeMutedText);
-        DrawTextEx(font_, "ENTER RESTART", {static_cast<float>(kSidePanelX + 20), 586.0f}, 12.0f, 1.0f, kThemeMutedText);
+        drawPanel(layout.nextPanel, "NEXT");
+
+        drawPanel(layout.controlsPanel, "CONTROLS");
+        DrawTextEx(font_, "LEFT/RIGHT MOVE", layout.controlsLine1, 12.0f, 1.0f, kThemeMutedText);
+        DrawTextEx(font_, "UP         ROTATE", layout.controlsLine2, 12.0f, 1.0f, kThemeMutedText);
+        DrawTextEx(font_, "DOWN       SOFT DROP", layout.controlsLine3, 12.0f, 1.0f, kThemeMutedText);
+        DrawTextEx(font_, "SPACE      HARD DROP", layout.controlsLine4, 12.0f, 1.0f, kThemeMutedText);
+        DrawTextEx(font_, "P/ESC      PAUSE", layout.controlsLine5, 12.0f, 1.0f, kThemeMutedText);
+        DrawTextEx(font_, "ENTER      RESTART", layout.controlsLine6, 12.0f, 1.0f, kThemeMutedText);
     }
 
     void RaylibRenderer::drawOverlay(const Game &game) const
@@ -161,23 +164,28 @@ namespace tetris
             return;
         }
 
-        const Rectangle overlay{20.0f, 250.0f, 290.0f, 145.0f};
-        DrawRectangleRounded(overlay, 0.08f, 10, kThemeOverlay);
-        DrawRectangleRoundedLines(overlay, 0.08f, 10, kThemePanelBorder);
+        const UiLayout layout = makeUiLayout();
+        if (game.isPaused())
+        {
+            DrawRectangleRounded(layout.boardFrame, 0.035f, 8, Fade(kThemeWarning, 0.08f));
+        }
+
+        DrawRectangleRounded(layout.overlay, 0.08f, 10, kThemeOverlay);
+        DrawRectangleRoundedLines(layout.overlay, 0.08f, 10, kThemePanelBorder);
 
         if (game.isGameOver())
         {
-            drawTextCentered("GAME OVER", {20.0f, 274.0f, 290.0f, 34.0f}, 22.0f, kThemeDanger);
+            drawTextCentered("GAME OVER", layout.overlayTitle, 22.0f, kThemeDanger);
 
             char finalScore[32];
             std::snprintf(finalScore, sizeof(finalScore), "SCORE %d", game.score());
-            drawTextCentered(finalScore, {20.0f, 322.0f, 290.0f, 24.0f}, 14.0f, kThemeText);
-            drawTextCentered("ENTER / SPACE TO RESTART", {20.0f, 360.0f, 290.0f, 20.0f}, 10.0f, kThemeMutedText);
+            drawTextCentered(finalScore, layout.overlayScore, 14.0f, kThemeText);
+            drawTextCentered("ENTER / SPACE TO RESTART", layout.overlayHint, 10.0f, kThemeMutedText);
         }
         else
         {
-            drawTextCentered("PAUSED", {20.0f, 286.0f, 290.0f, 34.0f}, 24.0f, kThemeWarning);
-            drawTextCentered("PRESS P OR ESC TO RESUME", {20.0f, 345.0f, 290.0f, 20.0f}, 10.0f, kThemeMutedText);
+            drawTextCentered("PAUSED", layout.overlayTitle, 24.0f, kThemeWarning);
+            drawTextCentered("PRESS P OR ESC TO RESUME", layout.overlayHint, 10.0f, kThemeMutedText);
         }
     }
 

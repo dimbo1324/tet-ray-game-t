@@ -6,15 +6,15 @@ The game uses Raylib through CMake FetchContent. See the Raylib project for its 
 
 ## Fonts
 
-Fonts under `assets/fonts/` include `OFL.txt` files in their font directories. Keep those files with the distributed assets.
+Fonts under `assets/fonts/` include OFL license files in their font directories. Keep those files with the distributed assets.
 
 Current bundled font directories:
 
-- `Press_Start_2P`
-- `Rubik_Glitch`
-- `Rubik_Glitch_Pop`
-- `Rubik_Iso`
-- `Rubik_Wet_Paint`
+- `assets/fonts/Press_Start_2P/OFL.txt`
+- `assets/fonts/Rubik_Glitch/OFL.txt`
+- `assets/fonts/Rubik_Glitch_Pop/OFL.txt`
+- `assets/fonts/Rubik_Iso/OFL.txt`
+- `assets/fonts/Rubik_Wet_Paint/OFL.txt`
 
 ## Sounds And Music
 
@@ -28,4 +28,4 @@ Their original source and redistribution license are not documented in the repos
 
 ## Project License
 
-No root `LICENSE` file is present yet. Add one before public redistribution.
+Project source code is released under the MIT License. See [../LICENSE](../LICENSE).

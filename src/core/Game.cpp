@@ -1,7 +1,7 @@
 #include "Game.h"
 
+#include "LevelSystem.h"
 #include "ScoreSystem.h"
-#include "constants.h"
 
 #include <algorithm>
 
@@ -219,7 +219,7 @@ namespace tetris
 
     int Game::level() const
     {
-        return (totalLinesCleared_ / 10) + 1;
+        return LevelSystem::levelForLines(totalLinesCleared_);
     }
 
     int Game::totalLinesCleared() const
@@ -229,8 +229,7 @@ namespace tetris
 
     double Game::dropIntervalSeconds() const
     {
-        const double interval = kBaseDropIntervalSeconds - ((level() - 1) * kDropIntervalLevelStepSeconds);
-        return std::max(kMinimumDropIntervalSeconds, interval);
+        return LevelSystem::dropIntervalForLevel(level());
     }
 
     const Grid &Game::grid() const
