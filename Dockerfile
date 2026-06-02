@@ -5,11 +5,10 @@ ENV CMAKE_GENERATOR=Ninja
 
 RUN set -eux; \
     packages="build-essential ca-certificates cmake git libasound2-dev libgl1-mesa-dev libudev-dev libx11-dev libxcursor-dev libxi-dev libxinerama-dev libxrandr-dev ninja-build pkg-config"; \
-    apt-get -o Acquire::Retries=5 update; \
     for attempt in 1 2 3 4 5; do \
+        apt-get -o Acquire::Retries=5 update || true; \
         apt-get -o Acquire::Retries=5 install -y --no-install-recommends $packages && break; \
         if [ "$attempt" = "5" ]; then exit 1; fi; \
-        apt-get -o Acquire::Retries=5 update; \
         sleep $((attempt * 10)); \
     done; \
     rm -rf /var/lib/apt/lists/*

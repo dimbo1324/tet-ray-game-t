@@ -5,12 +5,14 @@ namespace tetris
 {
     constexpr int kCellSize = 30;
     constexpr int kExtraPixels = 11;
-    constexpr int kWindowWidth = 500;
-    constexpr int kWindowHeight = 620;
+    constexpr int kBoardPixelWidth = 10 * kCellSize;
+    constexpr int kBoardPixelHeight = 20 * kCellSize;
+    constexpr int kWindowWidth = 610;
+    constexpr int kWindowHeight = 700;
     constexpr int kTargetFPS = 60;
-    constexpr int kXUiTextPosition = kCellSize * 350 / kCellSize;
-    constexpr int kYUiTextPosition = kCellSize * 15 / kCellSize;
-    constexpr int kFontSizeUiText = kCellSize / 1.5;
+    constexpr int kSidePanelX = 340;
+    constexpr int kSidePanelWidth = 250;
+    constexpr int kFontSizeUiText = 20;
 }
 
 #endif

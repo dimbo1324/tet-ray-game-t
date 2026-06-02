@@ -25,6 +25,28 @@
         "CMAKE_BUILD_TYPE": "Release",
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
       }
+    },
+    {
+      "name": "debug-sanitize",
+      "displayName": "Debug Sanitizers",
+      "description": "Debug build with address and undefined behavior sanitizers where supported.",
+      "binaryDir": "${sourceDir}/build/debug-sanitize",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "TET_RAY_GAME_ENABLE_SANITIZERS": "ON"
+      }
+    },
+    {
+      "name": "debug-clang-tidy",
+      "displayName": "Debug clang-tidy",
+      "description": "Debug build with optional clang-tidy integration if clang-tidy is installed.",
+      "binaryDir": "${sourceDir}/build/debug-clang-tidy",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "TET_RAY_GAME_ENABLE_CLANG_TIDY": "ON"
+      }
     }
   ],
   "buildPresets": [
@@ -37,6 +59,16 @@
       "name": "release",
       "displayName": "Release",
       "configurePreset": "release"
+    },
+    {
+      "name": "debug-sanitize",
+      "displayName": "Debug Sanitizers",
+      "configurePreset": "debug-sanitize"
+    },
+    {
+      "name": "debug-clang-tidy",
+      "displayName": "Debug clang-tidy",
+      "configurePreset": "debug-clang-tidy"
     }
   ]
 }

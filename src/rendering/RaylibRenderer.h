@@ -29,6 +29,14 @@ namespace tetris
 
         void drawNextBlock(const Block &block) const;
 
+        void drawSidePanel(const Game &game) const;
+
+        void drawOverlay(const Game &game) const;
+
+        void drawPanel(Rectangle bounds, const char *title) const;
+
+        void drawTextCentered(const char *text, Rectangle bounds, float fontSize, Color color) const;
+
         Font font_{};
     };
 }

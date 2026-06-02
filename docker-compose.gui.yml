@@ -1,0 +1,16 @@
+services:
+  game-x11:
+    build: .
+    image: tet-ray-game-builder
+    working_dir: /workspace
+    volumes:
+      - .:/workspace
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    environment:
+      CMAKE_GENERATOR: Ninja
+      DISPLAY: ${DISPLAY}
+    command: >
+      bash -lc "cmake -S . -B build/docker-debug -DCMAKE_BUILD_TYPE=Debug
+      && cmake --build build/docker-debug
+      && cd build/docker-debug
+      && ./tet_ray_game_app"
