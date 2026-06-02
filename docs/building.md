@@ -23,6 +23,21 @@ cmake --preset release
 cmake --build --preset release
 ```
 
+Release application build without test targets:
+
+```bash
+cmake --preset release-no-tests
+cmake --build --preset release-no-tests
+```
+
+Core/tests-only build without the Raylib app:
+
+```bash
+cmake -S . -B build/core-tests -DTET_RAY_GAME_BUILD_APP=OFF -DTET_RAY_GAME_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Debug
+cmake --build build/core-tests
+ctest --test-dir build/core-tests --output-on-failure
+```
+
 ## Clean Build
 
 ```bash
@@ -69,6 +84,8 @@ cmake --build --preset debug-clang-tidy
 ```
 
 If `clang-tidy` is not installed, CMake warns but does not fail.
+
+`TET_RAY_GAME_BUILD_APP=OFF` keeps Raylib out of configure/build for headless core test runs.
 
 ## Platform Notes
 

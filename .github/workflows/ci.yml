@@ -52,6 +52,10 @@ jobs:
         if: runner.os == 'Linux'
         run: bash scripts/check-core-boundary.sh
 
+      - name: Check README links
+        if: runner.os == 'Linux'
+        run: bash scripts/check-readme-links.sh
+
       - name: Configure Debug
         run: cmake --preset debug
 
@@ -61,6 +65,18 @@ jobs:
       - name: Test Debug
         run: ctest --test-dir build/debug --output-on-failure
 
+      - name: Configure Core Tests Only
+        if: runner.os == 'Linux'
+        run: cmake -S . -B build/core-tests -DTET_RAY_GAME_BUILD_APP=OFF -DTET_RAY_GAME_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Debug
+
+      - name: Build Core Tests Only
+        if: runner.os == 'Linux'
+        run: cmake --build build/core-tests
+
+      - name: Test Core Tests Only
+        if: runner.os == 'Linux'
+        run: ctest --test-dir build/core-tests --output-on-failure
+
       - name: Configure Release
         run: cmake --preset release
 
@@ -69,6 +85,14 @@ jobs:
 
       - name: Install Release
         run: cmake --install build/release --prefix dist
+
+      - name: Configure Release without tests
+        if: runner.os == 'Linux'
+        run: cmake --preset release-no-tests
+
+      - name: Build Release without tests
+        if: runner.os == 'Linux'
+        run: cmake --build --preset release-no-tests
 
       - name: Verify package layout
         shell: bash
@@ -99,6 +123,9 @@ jobs:
 
       - name: Check core boundary
         run: bash scripts/check-core-boundary.sh
+
+      - name: Check README links
+        run: bash scripts/check-readme-links.sh
 
       - name: Configure Debug Sanitizers
         run: cmake --preset debug-sanitize

@@ -15,6 +15,7 @@ Modern C++23 / Raylib Tetris game with portable CMake, Catch2 tests, GitHub Acti
 - Music and sound effects.
 - Polished Raylib UI with readable panels and pause/game-over overlays.
 - Portable CMake presets.
+- Optional Raylib-free core/tests-only build.
 - Catch2 and CTest coverage for core gameplay logic.
 - GitHub Actions CI across Linux, Windows, and macOS.
 - Docker build/test/package environment.
@@ -38,6 +39,7 @@ Modern C++23 / Raylib Tetris game with portable CMake, Catch2 tests, GitHub Acti
 |-- assets/
 |   |-- fonts/
 |   `-- sounds/
+|-- cmake/
 |-- docs/
 |-- scripts/
 |-- src/
@@ -51,6 +53,7 @@ Modern C++23 / Raylib Tetris game with portable CMake, Catch2 tests, GitHub Acti
 |-- CMakeLists.txt
 |-- CMakePresets.json
 |-- Dockerfile
+|-- LICENSE
 `-- docker-compose.yml
 ```
 
@@ -89,12 +92,26 @@ ctest --test-dir build/debug --output-on-failure
 
 The `tet_ray_game_tests` target links to `tet_ray_game_core` and Catch2. The gameplay core is intentionally Raylib-free, so logic tests run headlessly.
 
+Core/tests-only build without the Raylib application:
+
+```bash
+cmake -S . -B build/core-tests -DTET_RAY_GAME_BUILD_APP=OFF -DTET_RAY_GAME_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Debug
+cmake --build build/core-tests
+ctest --test-dir build/core-tests --output-on-failure
+```
+
 ## Docker
 
 Build the builder image:
 
 ```bash
 docker build -t tet-ray-game-builder .
+```
+
+If an Ubuntu mirror is unhealthy during `apt-get`, pass a mirror:
+
+```bash
+docker build --build-arg UBUNTU_MIRROR=http://archive.ubuntu.com/ubuntu -t tet-ray-game-builder .
 ```
 
 Run the build/test/package workflow:
@@ -127,6 +144,14 @@ cmake --build --preset release
 cmake --install build/release --prefix dist
 ```
 
+For packaging without test targets:
+
+```bash
+cmake --preset release-no-tests
+cmake --build --preset release-no-tests
+cmake --install build/release-no-tests --prefix dist
+```
+
 Expected layout:
 
 ```text
@@ -152,6 +177,7 @@ dist/
 - `src/core` owns gameplay state and rules and does not include Raylib.
 - `src/rendering`, `src/audio`, `src/input`, and `src/assets` are adapter layers.
 - `src/app` wires the core and adapters into the Raylib loop.
+- `cmake/ProjectOptions.cmake` owns reusable build quality options.
 - Tests target the core logic first, keeping CI headless and portable.
 
 More detail: [docs/architecture.md](docs/architecture.md).
@@ -161,11 +187,17 @@ More detail: [docs/architecture.md](docs/architecture.md).
 - Catch2 tests are discovered through CTest.
 - CI builds Debug and Release on Linux, Windows, and macOS.
 - A core boundary script checks that Raylib does not leak into `src/core`.
+- README local links are checked by `scripts/check-readme-links.ps1` and `scripts/check-readme-links.sh`.
 - Project warnings are enabled by default for project targets.
 - Warnings-as-errors, sanitizers, and clang-tidy are available as opt-in CMake options.
 - cppcheck commands are documented and scripted for local use.
 
-See [docs/testing.md](docs/testing.md) and [docs/building.md](docs/building.md).
+See [docs/testing.md](docs/testing.md), [docs/building.md](docs/building.md), and [docs/quality.md](docs/quality.md).
+
+## Contributing And Security
+
+- Contribution notes: [CONTRIBUTING.md](CONTRIBUTING.md).
+- Security policy: [SECURITY.md](SECURITY.md).
 
 ## Screenshots
 
@@ -181,7 +213,7 @@ See [docs/assets-and-licenses.md](docs/assets-and-licenses.md).
 
 ## License
 
-No root `LICENSE` file is present yet. Add a project license before public redistribution.
+Project source code is released under the MIT License. See [LICENSE](LICENSE).
 
 ## Roadmap
 
@@ -198,6 +230,7 @@ Completed:
 - UI polish.
 - GitHub-ready documentation.
 - Static analysis and hardening configuration.
+- Repository license, style configs, README link checks, and core/tests-only build mode.
 
 Future:
 

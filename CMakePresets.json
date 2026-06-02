@@ -27,6 +27,18 @@
       }
     },
     {
+      "name": "release-no-tests",
+      "displayName": "Release without tests",
+      "description": "Release application build without Catch2 test targets.",
+      "binaryDir": "${sourceDir}/build/release-no-tests",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "TET_RAY_GAME_BUILD_APP": "ON",
+        "TET_RAY_GAME_BUILD_TESTS": "OFF"
+      }
+    },
+    {
       "name": "debug-sanitize",
       "displayName": "Debug Sanitizers",
       "description": "Debug build with address and undefined behavior sanitizers where supported.",
@@ -59,6 +71,11 @@
       "name": "release",
       "displayName": "Release",
       "configurePreset": "release"
+    },
+    {
+      "name": "release-no-tests",
+      "displayName": "Release without tests",
+      "configurePreset": "release-no-tests"
     },
     {
       "name": "debug-sanitize",

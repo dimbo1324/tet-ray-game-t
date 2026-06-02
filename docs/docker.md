@@ -8,6 +8,12 @@ The default Docker environment is for building, testing, and packaging. It is no
 docker build -t tet-ray-game-builder .
 ```
 
+If the default Ubuntu mirror is unhealthy, pass a replacement mirror:
+
+```bash
+docker build --build-arg UBUNTU_MIRROR=http://archive.ubuntu.com/ubuntu -t tet-ray-game-builder .
+```
+
 ## Compose Builder
 
 ```bash
@@ -23,7 +29,7 @@ This avoids clashing with host CMake preset directories such as `build/debug`.
 
 ## Docker Apt Mirror Issues
 
-The Dockerfile uses apt retry loops because Ubuntu mirrors can occasionally return `503 Service Unavailable`. If Docker still fails during package installation, retry later or configure Docker to use a healthier mirror.
+The Dockerfile uses apt retry loops because Ubuntu mirrors can occasionally return `503 Service Unavailable`. If Docker still fails during package installation, retry later or pass `UBUNTU_MIRROR` with a healthier Ubuntu mirror.
 
 ## Experimental Linux X11 Runner
 
