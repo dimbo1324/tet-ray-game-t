@@ -29,11 +29,10 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           packages="build-essential cmake ninja-build git pkg-config ca-certificates libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libgl1-mesa-dev libasound2-dev libudev-dev"
-          sudo apt-get -o Acquire::Retries=5 update
           for attempt in 1 2 3 4 5; do
+            sudo apt-get -o Acquire::Retries=5 update || true
             sudo apt-get -o Acquire::Retries=5 install -y --no-install-recommends $packages && break
             if [ "$attempt" = "5" ]; then exit 1; fi
-            sudo apt-get -o Acquire::Retries=5 update
             sleep $((attempt * 10))
           done
 
@@ -78,3 +77,34 @@ jobs:
           test -d dist/assets/fonts
           test -d dist/assets/sounds
           test -f dist/README.md
+
+  quality-linux:
+    name: quality-linux
+    runs-on: ubuntu-latest
+    env:
+      CMAKE_GENERATOR: Ninja
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Ubuntu dependencies
+        run: |
+          packages="build-essential cmake ninja-build git pkg-config ca-certificates libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libgl1-mesa-dev libasound2-dev libudev-dev"
+          for attempt in 1 2 3 4 5; do
+            sudo apt-get -o Acquire::Retries=5 update || true
+            sudo apt-get -o Acquire::Retries=5 install -y --no-install-recommends $packages && break
+            if [ "$attempt" = "5" ]; then exit 1; fi
+            sleep $((attempt * 10))
+          done
+
+      - name: Check core boundary
+        run: bash scripts/check-core-boundary.sh
+
+      - name: Configure Debug Sanitizers
+        run: cmake --preset debug-sanitize
+
+      - name: Build Debug Sanitizers
+        run: cmake --build --preset debug-sanitize
+
+      - name: Test Debug Sanitizers
+        run: ctest --test-dir build/debug-sanitize --output-on-failure

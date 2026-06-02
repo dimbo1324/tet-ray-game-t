@@ -1,0 +1,21 @@
+---
+Checks: >
+  clang-analyzer-*,
+  bugprone-*,
+  performance-*,
+  modernize-*,
+  readability-*,
+  cppcoreguidelines-*,
+  -cppcoreguidelines-avoid-magic-numbers,
+  -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+  -cppcoreguidelines-pro-bounds-pointer-arithmetic,
+  -cppcoreguidelines-pro-type-vararg,
+  -readability-magic-numbers,
+  -readability-identifier-length
+WarningsAsErrors: ''
+HeaderFilterRegex: '^(src|tests)/'
+FormatStyle: file
+CheckOptions:
+  - key: modernize-use-trailing-return-type.IgnoreMacros
+    value: 'true'
+...

@@ -80,7 +80,7 @@ int main(int argc, char **argv)
     const char *executablePath = argc > 0 ? argv[0] : nullptr;
     const ResourcePaths resourcePaths(executablePath);
 
-    InitWindow(kWindowWidth, kWindowHeight, "Tetris by C++");
+    InitWindow(kWindowWidth, kWindowHeight, "TetRay Game");
     SetTargetFPS(kTargetFPS);
 
     {
